@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2C6E7A">
+<title>조과 기록장</title>
+<style>
+  :root {
+    --accent: #2C6E7A;
+    --accent-light: #3A8D9A;
+    --bg: #F5F0E8;
+    --card: #FFFFFF;
+    --text: #2A2A2A;
+    --text-mid: #5A5A5A;
+    --muted: #A0A0A0;
+    --border: #e0dbd2;
+    --sand: #f0ece4;
+    --warm: #8B7355;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: 'Apple SD Gothic Neo','Pretendard','Noto Sans KR',sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, var(--accent) 0%, #1B4F5A 100%);
+    color: #fff;
+    overflow: hidden;
+  }
+  .header-inner { padding: 28px 20px 12px; }
+  .header-title { display:flex; align-items:center; gap:10px; }
+  .header-title h1 { font-size:22px; font-weight:700; color:#E8D5B7; letter-spacing:-0.5px; }
+  .header-sub { margin:6px 0 0 36px; font-size:13px; opacity:0.8; }
+  .wave { display:block; opacity:0.15; }
+
+  /* ── Content ── */
+  .content { flex:1; padding-bottom:80px; }
+
+  /* ── Nav ── */
+  .nav {
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px;
+    background:#fff; display:flex; justify-content:space-around; align-items:flex-end;
+    padding:6px 0 env(safe-area-inset-bottom, 8px);
+    border-top:1px solid #e8e3da; z-index:100;
+  }
+  .nav-btn {
+    background:none; border:none; display:flex; flex-direction:column;
+    align-items:center; cursor:pointer; padding:4px 16px; gap:2px;
+    font-family:inherit; font-size:11px; color:var(--muted);
+  }
+  .nav-btn.active { color:var(--accent); }
+  .nav-center-circle {
+    background:var(--accent); border-radius:50%; width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; margin-top:-18px;
+    box-shadow:0 2px 12px rgba(44,110,122,0.35);
+  }
+  .nav-btn.center-active .nav-center-circle { background:var(--accent-light); }
+
+  /* ── Empty ── */
+  .empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; text-align:center; color:var(--muted); }
+  .empty p { margin-top:12px; }
+  .empty .sub { font-size:13px; }
+
+  /* ── Card List ── */
+  .list-wrap { padding:12px 16px; }
+  .card {
+    background:var(--card); border-radius:14px; padding:16px; margin-bottom:10px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .card-date { font-size:13px; font-weight:600; color:var(--accent); }
+  .card-location { font-size:12px; color:var(--text-mid); background:var(--sand); padding:3px 10px; border-radius:20px; }
+  .card-body { display:flex; justify-content:space-between; align-items:center; }
+  .card-species { display:flex; align-items:center; gap:6px; }
+  .card-species-text { font-size:17px; font-weight:700; }
+  .card-stats { display:flex; gap:6px; }
+  .badge { font-size:13px; font-weight:600; color:var(--accent); background:#e6f2f4; padding:4px 10px; border-radius:20px; }
+  .card-cost-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; font-size:12px; }
+  .card-boat { background:var(--sand); padding:3px 10px; border-radius:12px; font-size:12px; }
+  .card-cost { font-size:12px; color:var(--warm); font-weight:600; }
+  .card-extra-items { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+  .card-extra-tag { font-size:11px; color:var(--warm); background:#f5f0e8; padding:2px 8px; border-radius:10px; }
+  .card-memo { font-size:12px; color:var(--text-mid); margin-top:8px; line-height:1.5; border-top:1px solid var(--sand); padding-top:8px; }
+  .card-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:8px; }
+  .edit-btn { background:none; border:1px solid #ddd; border-radius:8px; padding:4px 12px; font-size:12px; color:var(--text-mid); cursor:pointer; font-family:inherit; }
+  .delete-btn { background:none; border:none; padding:4px; cursor:pointer; color:var(--muted); display:flex; align-items:center; }
+  .confirm-wrap { display:flex; align-items:center; gap:6px; }
+  .confirm-yes { background:#c0392b; color:#fff; border:none; border-radius:6px; padding:3px 10px; font-size:12px; cursor:pointer; font-family:inherit; }
+  .confirm-no { background:#eee; border:none; border-radius:6px; padding:3px 10px; font-size:12px; cursor:pointer; font-family:inherit; }
+
+  /* ── Form ── */
+  .form-wrap { padding:16px 20px; }
+  .form-title { font-size:18px; font-weight:700; margin:0 0 16px; }
+  label.lbl { font-size:13px; font-weight:600; color:var(--text-mid); margin-bottom:6px; display:block; margin-top:14px; }
+  .inp {
+    width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:15px; background:#fff; font-family:inherit; outline:none;
+  }
+  .inp:focus { border-color:var(--accent); }
+  textarea.inp { resize:vertical; font-size:14px; }
+  .preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .preset-chip {
+    padding:6px 14px; border-radius:20px; border:1.5px solid var(--border);
+    background:#fff; font-size:13px; cursor:pointer; font-family:inherit; color:var(--text-mid);
+  }
+  .preset-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .dropdown {
+    position:absolute; top:100%; left:0; right:0; background:#fff;
+    border:1.5px solid var(--border); border-radius:10px; max-height:200px;
+    overflow-y:auto; z-index:50; box-shadow:0 4px 16px rgba(0,0,0,0.1);
+  }
+  .dropdown-item {
+    width:100%; padding:10px 14px; border:none; background:none;
+    font-size:14px; text-align:left; cursor:pointer; font-family:inherit;
+    border-bottom:1px solid var(--sand);
+  }
+  .dropdown-item:active { background:var(--sand); }
+  .dropdown-close { width:100%; padding:8px; border:none; background:var(--sand); font-size:12px; cursor:pointer; font-family:inherit; color:var(--muted); }
+
+  .cost-field {
+    display:flex; align-items:center; background:#fff;
+    border:1.5px solid var(--border); border-radius:10px; padding:0 12px; gap:6px;
+  }
+  .cost-input {
+    flex:1; border:none; outline:none; font-size:15px; padding:12px 0;
+    background:transparent; font-family:inherit; text-align:right; min-width:0;
+  }
+  .cost-unit { font-size:13px; color:var(--muted); white-space:nowrap; }
+
+  .extra-header { display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+  .add-item-btn {
+    background:none; border:1.5px dashed #c0bab0; border-radius:8px;
+    padding:5px 12px; font-size:12px; color:var(--accent); font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .extra-item-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .extra-desc-input {
+    flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:14px; background:#fff; font-family:inherit; outline:none; min-width:0;
+  }
+  .extra-amount-wrap {
+    display:flex; align-items:center; background:#fff;
+    border:1.5px solid var(--border); border-radius:10px; padding:0 10px; gap:4px;
+    width:120px; flex-shrink:0;
+  }
+  .extra-amount-input {
+    width:100%; border:none; outline:none; font-size:14px; padding:10px 0;
+    background:transparent; font-family:inherit; text-align:right;
+  }
+  .remove-item-btn { background:none; border:none; font-size:16px; color:var(--muted); cursor:pointer; padding:4px 2px; }
+  .total-row {
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(44,110,122,0.06); border-radius:10px; padding:12px 14px; margin-top:10px;
+  }
+  .total-label { font-size:14px; font-weight:700; }
+  .total-value { font-size:17px; font-weight:800; color:var(--accent); }
+
+  .form-buttons { display:flex; gap:10px; margin-top:24px; }
+  .cancel-btn {
+    flex:1; padding:14px; border-radius:12px; border:1.5px solid var(--border);
+    background:#fff; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text-mid);
+  }
+  .submit-btn {
+    flex:2; padding:14px; border-radius:12px; border:none;
+    background:var(--accent); color:#fff; font-size:15px; font-weight:700;
+    cursor:pointer; font-family:inherit;
+  }
+  .submit-btn:disabled { opacity:0.4; }
+
+  /* ── Stats ── */
+  .stats-wrap { padding:16px 20px; }
+  .stat-cards { display:flex; gap:10px; margin-bottom:20px; }
+  .stat-card {
+    flex:1; background:var(--card); border-radius:14px; padding:16px 10px;
+    text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .stat-num { display:block; font-size:26px; font-weight:800; color:var(--accent); }
+  .stat-label { font-size:12px; color:var(--muted); margin-top:4px; display:block; }
+  .stat-section {
+    background:var(--card); border-radius:14px; padding:16px; margin-bottom:12px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .stat-section-title { font-size:15px; font-weight:700; margin:0 0 12px; }
+  .biggest-card { background:linear-gradient(135deg,rgba(44,110,122,0.08),rgba(44,110,122,0.03)); border-radius:10px; padding:14px; text-align:center; }
+  .biggest-size { display:block; font-size:32px; font-weight:800; color:var(--accent); }
+  .biggest-info { font-size:13px; color:var(--text-mid); margin-top:4px; display:block; }
+  .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .bar-label { font-size:13px; font-weight:600; min-width:70px; flex-shrink:0; }
+  .bar-track { flex:1; height:14px; background:var(--sand); border-radius:7px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-light)); border-radius:7px; transition:width 0.5s; }
+  .bar-val { font-size:13px; font-weight:700; color:var(--accent); min-width:24px; text-align:right; }
+  .loc-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--sand); }
+  .loc-rank { font-size:13px; font-weight:800; color:var(--accent); min-width:28px; }
+  .loc-name { flex:1; font-size:14px; }
+  .loc-cnt { font-size:13px; color:var(--muted); }
+  .month-chart { display:flex; justify-content:space-around; align-items:flex-end; height:140px; padding-top:10px; }
+  .month-col { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .month-val { font-size:12px; font-weight:700; color:var(--accent); }
+  .month-bar { width:28px; background:linear-gradient(180deg,var(--accent-light),var(--accent)); border-radius:6px 6px 2px 2px; transition:height 0.5s; }
+  .month-label { font-size:11px; color:var(--muted); }
+
+  .cost-summary-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
+  .cost-summary-label { font-size:14px; color:var(--text-mid); }
+  .cost-summary-val { font-size:15px; font-weight:600; }
+  .cost-summary-total { border-top:1.5px solid var(--border); padding-top:10px; margin-top:4px; }
+  .cost-summary-total .cost-summary-label { font-weight:700; }
+  .cost-summary-total .cost-summary-val { font-weight:800; color:var(--accent); }
+  .cost-per-fish { margin-top:8px; }
+  .cost-per-fish .cost-summary-val { font-size:14px; color:var(--text-mid); }
+
+  /* ── Export/Import ── */
+  .data-section { padding:16px 20px; }
+  .data-title { font-size:18px; font-weight:700; margin:0 0 16px; }
+  .data-btn {
+    width:100%; padding:14px; border-radius:12px; border:1.5px solid var(--border);
+    background:#fff; font-size:14px; font-weight:600; cursor:pointer;
+    font-family:inherit; color:var(--text); margin-bottom:10px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .data-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .data-desc { font-size:12px; color:var(--muted); text-align:center; margin-bottom:16px; line-height:1.6; }
+  .data-danger { margin-top:24px; padding-top:16px; border-top:1px solid var(--border); }
+  .data-btn.danger { color:#c0392b; border-color:#e0c0c0; }
+  #csvFileInput { display:none; }
+  .toast {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    background:var(--text); color:#fff; padding:12px 24px; border-radius:12px;
+    font-size:14px; z-index:999; opacity:0; transition:opacity 0.3s;
+    pointer-events:none; max-width:90%;
+  }
+  .toast.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8D5B7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 12c3-6 11-6 14.5 0c-3.5 6-11.5 6-14.5 0z"/><circle cx="17" cy="12" r="1" fill="#E8D5B7" stroke="none"/><path d="M2 12l4.5-3v6L2 12z"/>
+      </svg>
+      <h1>조과 기록장</h1>
+    </div>
+    <p class="header-sub" id="headerSub">첫 조과를 기록해보세요!</p>
+  </div>
+  <svg class="wave" width="100%" height="40" viewBox="0 0 400 40" preserveAspectRatio="none">
+    <path d="M0,25 Q50,5 100,25 T200,25 T300,25 T400,25 L400,40 L0,40 Z" fill="#E8D5B7"/>
+    <path d="M0,30 Q50,15 100,30 T200,30 T300,30 T400,30 L400,40 L0,40 Z" fill="#E8D5B7" opacity="0.5"/>
+  </svg>
+</div>
+
+<!-- Content -->
+<div class="content" id="content"></div>
+
+<!-- Nav -->
+<div class="nav">
+  <button class="nav-btn active" data-view="list" onclick="switchView('list')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+      <circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/>
+    </svg>
+    <span>기록</span>
+  </button>
+  <button class="nav-btn" data-view="add" onclick="switchView('add')">
+    <div class="nav-center-circle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </div>
+    <span>추가</span>
+  </button>
+  <button class="nav-btn" data-view="stats" onclick="switchView('stats')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/>
+    </svg>
+    <span>통계</span>
+  </button>
+  <button class="nav-btn" data-view="data" onclick="switchView('data')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    <span>내보내기</span>
+  </button>
+</div>
+
+<input type="file" id="csvFileInput" accept=".csv">
+
+<script>
+// ── Data ──
+const SPECIES = ["감성돔","참돔","볼락","우럭","광어","농어","숭어","고등어","전갱이","쥐노래미","돌돔","벵에돔","붕어","배스","송어","쏘가리","잉어","메기","무지개송어","기타"];
+const LOCATIONS = ["서해","남해","동해","제주","한강","낙동강","금강","영산강"];
+
+let records = JSON.parse(localStorage.getItem('fishing-records') || '[]');
+let currentView = 'list';
+let editingId = null;
+let confirmDeleteId = null;
+
+function save() {
+  localStorage.setItem('fishing-records', JSON.stringify(records));
+  updateHeader();
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function getToday() { return new Date().toISOString().split('T')[0]; }
+
+function fmtDate(ds) {
+  const d = new Date(ds);
+  const wd = ["일","월","화","수","목","금","토"][d.getDay()];
+  return `${d.getMonth()+1}/${d.getDate()} (${wd})`;
+}
+
+function num(v) { return Number(v) || 0; }
+
+function getExtraTotal(items) {
+  return (items || []).reduce((s,i) => s + num(i.amount), 0);
+}
+
+function getGrandTotal(r) {
+  return (num(r.boatFee) + getExtraTotal(r.extraItems)) * 1000;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function updateHeader() {
+  const el = document.getElementById('headerSub');
+  if (records.length === 0) { el.textContent = '첫 조과를 기록해보세요!'; return; }
+  const totalFish = records.reduce((s,r) => s + num(r.count), 0);
+  const totalCost = records.reduce((s,r) => s + getGrandTotal(r), 0);
+  el.textContent = `총 ${records.length}회 출조 · ${totalFish}마리 · ${totalCost.toLocaleString()}원`;
+}
+
+// ── Views ──
+function switchView(view, eid) {
+  currentView = view;
+  if (view !== 'add') editingId = null;
+  if (eid) editingId = eid;
+  confirmDeleteId = null;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+    b.classList.toggle('center-active', b.dataset.view === view && view === 'add');
+  });
+  render();
+}
+
+function render() {
+  const c = document.getElementById('content');
+  if (currentView === 'list') c.innerHTML = renderList();
+  else if (currentView === 'add') c.innerHTML = renderForm();
+  else if (currentView === 'stats') c.innerHTML = renderStats();
+  else if (currentView === 'data') c.innerHTML = renderData();
+  updateHeader();
+}
+
+// ── List ──
+function renderList() {
+  if (records.length === 0) return `
+    <div class="empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round">
+        <path d="M6.5 12c3-6 11-6 14.5 0c-3.5 6-11.5 6-14.5 0z"/><circle cx="17" cy="12" r="1" fill="var(--muted)" stroke="none"/><path d="M2 12l4.5-3v6L2 12z"/>
+      </svg>
+      <p>아직 기록이 없습니다</p>
+      <p class="sub">아래 + 버튼으로 첫 조과를 기록해보세요</p>
+    </div>`;
+
+  return `<div class="list-wrap">${records.map(r => {
+    const extraTotal = getExtraTotal(r.extraItems);
+    const grand = getGrandTotal(r);
+    const hasCost = r.boatFee || extraTotal > 0;
+    const isConfirm = confirmDeleteId === r.id;
+    return `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-date">${fmtDate(r.date)}</span>
+        <span class="card-location">${esc(r.location)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-species">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round">
+            <path d="M6.5 12c3-6 11-6 14.5 0c-3.5 6-11.5 6-14.5 0z"/><circle cx="17" cy="12" r="1" fill="var(--accent)" stroke="none"/><path d="M2 12l4.5-3v6L2 12z"/>
+          </svg>
+          <span class="card-species-text">${esc(r.species)}</span>
+        </div>
+        <div class="card-stats">
+          ${r.sizeCm ? `<span class="badge">${r.sizeCm}cm</span>` : ''}
+          <span class="badge">${num(r.count)}마리</span>
+        </div>
+      </div>
+      ${(r.boatName || hasCost) ? `
+        <div class="card-cost-row">
+          ${r.boatName ? `<span class="card-boat">⛵ ${esc(r.boatName)}</span>` : ''}
+          ${hasCost ? `<span class="card-cost">총 ${grand.toLocaleString()}원</span>` : ''}
+        </div>` : ''}
+      ${(r.extraItems && r.extraItems.length > 0) ? `
+        <div class="card-extra-items">
+          ${r.boatFee ? `<span class="card-extra-tag">선비 ${(r.boatFee*1000).toLocaleString()}</span>` : ''}
+          ${r.extraItems.map(i => (i.desc||i.amount) ? `<span class="card-extra-tag">${esc(i.desc||'기타')} ${i.amount ? (num(i.amount)*1000).toLocaleString() : ''}</span>` : '').join('')}
+        </div>` : ''}
+      ${r.memo ? `<p class="card-memo">${esc(r.memo)}</p>` : ''}
+      <div class="card-actions">
+        <button class="edit-btn" onclick="switchView('add','${r.id}')">수정</button>
+        ${isConfirm ? `
+          <span class="confirm-wrap">
+            <span style="font-size:12px;color:#c0392b">삭제할까요?</span>
+            <button class="confirm-yes" onclick="doDelete('${r.id}')">예</button>
+            <button class="confirm-no" onclick="cancelDelete()">아니오</button>
+          </span>
+        ` : `
+          <button class="delete-btn" onclick="askDelete('${r.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+          </button>
+        `}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function askDelete(id) { confirmDeleteId = id; render(); }
+function cancelDelete() { confirmDeleteId = null; render(); }
+function doDelete(id) { records = records.filter(r => r.id !== id); save(); confirmDeleteId = null; render(); }
+
+// ── Form ──
+function renderForm() {
+  const r = editingId ? records.find(x => x.id === editingId) : null;
+  const isEdit = !!r;
+  const date = r?.date || getToday();
+  const location = r?.location || '';
+  const species = r?.species || '';
+  const sizeCm = r?.sizeCm || '';
+  const count = r?.count ?? '';
+  const boatName = r?.boatName || '';
+  const boatFee = r?.boatFee || '';
+  const extraItems = r?.extraItems || [];
+  const memo = r?.memo || '';
+
+  return `
+  <div class="form-wrap">
+    <h2 class="form-title">${isEdit ? '기록 수정' : '조과 기록하기'}</h2>
+
+    <label class="lbl">날짜</label>
+    <input type="date" class="inp" id="f-date" value="${date}">
+
+    <label class="lbl">장소</label>
+    <div class="preset-row">
+      ${LOCATIONS.map(l => `<button class="preset-chip ${location===l?'active':''}" onclick="pickLocation('${l}')">${l}</button>`).join('')}
+    </div>
+    <input type="text" class="inp" id="f-location" placeholder="상세 장소 (예: 통영 방파제)" value="${esc(location)}">
+
+    <label class="lbl">어종</label>
+    <div style="position:relative">
+      <input type="text" class="inp" id="f-species" placeholder="어종을 입력하거나 선택하세요" value="${esc(species)}" onfocus="showSpeciesDD()" autocomplete="off">
+      <div class="dropdown" id="speciesDD" style="display:none">
+        ${SPECIES.map(s => `<button class="dropdown-item" onclick="pickSpecies('${s}')">${s}</button>`).join('')}
+        <button class="dropdown-close" onclick="hideSpeciesDD()">닫기</button>
+      </div>
+    </div>
+
+    <label class="lbl">크기 (cm)</label>
+    <input type="number" class="inp" id="f-size" placeholder="예: 35" value="${sizeCm}" inputmode="decimal">
+
+    <label class="lbl">마릿수</label>
+    <input type="number" class="inp" id="f-count" placeholder="예: 5" value="${count}" inputmode="numeric">
+
+    <label class="lbl">선박명 (선택)</label>
+    <input type="text" class="inp" id="f-boat" placeholder="예: 해적호" value="${esc(boatName)}">
+
+    <label class="lbl">선비 (선택)</label>
+    <div class="cost-field">
+      <input type="number" class="cost-input" id="f-boatfee" placeholder="0" value="${boatFee}" inputmode="numeric" oninput="updateFormTotal()">
+      <span class="cost-unit">천원</span>
+    </div>
+
+    <div class="extra-header">
+      <label class="lbl" style="margin:0">부대비용 (선택)</label>
+      <button class="add-item-btn" onclick="addExtraItem()">+ 항목 추가</button>
+    </div>
+    <div id="extraItemsWrap">
+      ${extraItems.map((it,i) => extraItemHTML(i, it.desc, it.amount)).join('')}
+    </div>
+
+    <div id="formTotalWrap" style="display:none">
+      <div class="total-row">
+        <span class="total-label">총 비용</span>
+        <span class="total-value" id="formTotalValue">0원</span>
+      </div>
+    </div>
+
+    <label class="lbl">메모 (선택)</label>
+    <textarea class="inp" id="f-memo" placeholder="날씨, 미끼, 채비, 특이사항 등" rows="3">${esc(memo)}</textarea>
+
+    <div class="form-buttons">
+      <button class="cancel-btn" onclick="switchView('list')">취소</button>
+      <button class="submit-btn" id="submitBtn" onclick="submitForm()">${isEdit ? '수정 완료' : '기록 저장'}</button>
+    </div>
+  </div>`;
+}
+
+function extraItemHTML(idx, desc, amount) {
+  return `
+  <div class="extra-item-row" data-idx="${idx}">
+    <input type="text" class="extra-desc-input" placeholder="내역 (예: 미끼)" value="${esc(desc||'')}" oninput="updateFormTotal()">
+    <div class="extra-amount-wrap">
+      <input type="number" class="extra-amount-input" placeholder="0" value="${amount||''}" inputmode="numeric" oninput="updateFormTotal()">
+      <span class="cost-unit">천원</span>
+    </div>
+    <button class="remove-item-btn" onclick="removeExtraItem(${idx})">✕</button>
+  </div>`;
+}
+
+let extraItemCount = 0;
+function addExtraItem() {
+  const wrap = document.getElementById('extraItemsWrap');
+  const idx = wrap.children.length;
+  wrap.insertAdjacentHTML('beforeend', extraItemHTML(idx, '', ''));
+  updateFormTotal();
+}
+
+function removeExtraItem(idx) {
+  const wrap = document.getElementById('extraItemsWrap');
+  const rows = wrap.querySelectorAll('.extra-item-row');
+  if (rows[idx]) rows[idx].remove();
+  updateFormTotal();
+}
+
+function getFormExtraItems() {
+  const rows = document.querySelectorAll('#extraItemsWrap .extra-item-row');
+  const items = [];
+  rows.forEach(row => {
+    const desc = row.querySelector('.extra-desc-input').value.trim();
+    const amount = row.querySelector('.extra-amount-input').value;
+    if (desc || amount) items.push({ desc, amount: amount ? Number(amount) : 0 });
+  });
+  return items;
+}
+
+function updateFormTotal() {
+  const feeEl = document.getElementById('f-boatfee');
+  const wrap = document.getElementById('formTotalWrap');
+  const val = document.getElementById('formTotalValue');
+  if (!feeEl || !wrap || !val) return;
+  const boatFee = num(feeEl.value);
+  const items = getFormExtraItems();
+  const extraSum = items.reduce((s,i) => s + num(i.amount), 0);
+  const total = (boatFee + extraSum) * 1000;
+  if (boatFee || extraSum > 0) {
+    wrap.style.display = 'block';
+    val.textContent = total.toLocaleString() + '원';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function pickLocation(loc) {
+  document.getElementById('f-location').value = loc;
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function showSpeciesDD() { document.getElementById('speciesDD').style.display = 'block'; }
+function hideSpeciesDD() { document.getElementById('speciesDD').style.display = 'none'; }
+function pickSpecies(s) { document.getElementById('f-species').value = s; hideSpeciesDD(); }
+
+function submitForm() {
+  const species = document.getElementById('f-species').value.trim();
+  const location = document.getElementById('f-location').value.trim();
+  if (!species || !location) { toast('어종과 장소를 입력해주세요'); return; }
+
+  const record = {
+    id: editingId || genId(),
+    date: document.getElementById('f-date').value,
+    location,
+    species,
+    sizeCm: num(document.getElementById('f-size').value) || null,
+    count: num(document.getElementById('f-count').value),
+    boatName: document.getElementById('f-boat').value.trim(),
+    boatFee: num(document.getElementById('f-boatfee').value) || null,
+    extraItems: getFormExtraItems(),
+    memo: document.getElementById('f-memo').value.trim(),
+  };
+
+  if (editingId) {
+    records = records.map(r => r.id === record.id ? record : r);
+  } else {
+    records.unshift(record);
+  }
+  save();
+  toast(editingId ? '수정되었습니다' : '저장되었습니다');
+  editingId = null;
+  switchView('list');
+}
+
+// ── Stats ──
+function renderStats() {
+  if (records.length === 0) return `<div class="empty"><p>기록이 쌓이면 통계를 볼 수 있어요</p></div>`;
+
+  const totalTrips = records.length;
+  const totalFish = records.reduce((s,r) => s + num(r.count), 0);
+  const avg = totalTrips > 0 ? (totalFish/totalTrips).toFixed(1) : 0;
+  const totalBoatFee = records.reduce((s,r) => s + num(r.boatFee), 0) * 1000;
+  const totalExtra = records.reduce((s,r) => s + getExtraTotal(r.extraItems), 0) * 1000;
+  const totalCost = totalBoatFee + totalExtra;
+  const costPerFish = totalFish > 0 ? Math.round(totalCost / totalFish) : 0;
+
+  // Species
+  const sMap = {};
+  records.forEach(r => { sMap[r.species] = (sMap[r.species]||0) + num(r.count); });
+  const sRank = Object.entries(sMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const sMax = sRank[0]?.[1] || 1;
+
+  // Location
+  const lMap = {};
+  records.forEach(r => { lMap[r.location] = (lMap[r.location]||0) + 1; });
+  const lRank = Object.entries(lMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  // Biggest
+  const wSize = records.filter(r => r.sizeCm);
+  const big = wSize.length > 0 ? wSize.reduce((m,r) => r.sizeCm > m.sizeCm ? r : m, wSize[0]) : null;
+
+  // Monthly
+  const mMap = {};
+  records.forEach(r => { const m = r.date.slice(0,7); mMap[m] = (mMap[m]||0) + num(r.count); });
+  const months = Object.entries(mMap).sort((a,b) => a[0].localeCompare(b[0])).slice(-6);
+  const mMax = Math.max(...months.map(m => m[1]), 1);
+
+  let html = `<div class="stats-wrap"><h2 class="form-title">나의 낚시 통계</h2>`;
+
+  html += `<div class="stat-cards">
+    <div class="stat-card"><span class="stat-num">${totalTrips}</span><span class="stat-label">총 출조</span></div>
+    <div class="stat-card"><span class="stat-num">${totalFish}</span><span class="stat-label">총 마릿수</span></div>
+    <div class="stat-card"><span class="stat-num">${avg}</span><span class="stat-label">평균/회</span></div>
+  </div>`;
+
+  if (totalCost > 0) {
+    html += `<div class="stat-section"><h3 class="stat-section-title">💰 비용 요약</h3>
+      <div class="cost-summary-row"><span class="cost-summary-label">선비 합계</span><span class="cost-summary-val">${totalBoatFee.toLocaleString()}원</span></div>
+      <div class="cost-summary-row"><span class="cost-summary-label">부대비용 합계</span><span class="cost-summary-val">${totalExtra.toLocaleString()}원</span></div>
+      <div class="cost-summary-row cost-summary-total"><span class="cost-summary-label">총 비용</span><span class="cost-summary-val">${totalCost.toLocaleString()}원</span></div>
+      ${costPerFish > 0 ? `<div class="cost-summary-row cost-per-fish"><span class="cost-summary-label">마리당 단가</span><span class="cost-summary-val">${costPerFish.toLocaleString()}원</span></div>` : ''}
+    </div>`;
+  }
+
+  if (big) {
+    html += `<div class="stat-section"><h3 class="stat-section-title">🏆 최대어</h3>
+      <div class="biggest-card"><span class="biggest-size">${big.sizeCm}cm</span>
+      <span class="biggest-info">${esc(big.species)} · ${esc(big.location)} · ${fmtDate(big.date)}</span></div></div>`;
+  }
+
+  html += `<div class="stat-section"><h3 class="stat-section-title">어종별 순위</h3>
+    ${sRank.map(([n,c],i) => `<div class="bar-row"><span class="bar-label">${i+1}. ${esc(n)}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/sMax)*100}%"></div></div><span class="bar-val">${c}</span></div>`).join('')}
+  </div>`;
+
+  html += `<div class="stat-section"><h3 class="stat-section-title">자주 가는 포인트</h3>
+    ${lRank.map(([n,c],i) => `<div class="loc-row"><span class="loc-rank">#${i+1}</span><span class="loc-name">${esc(n)}</span><span class="loc-cnt">${c}회</span></div>`).join('')}
+  </div>`;
+
+  if (months.length > 1) {
+    html += `<div class="stat-section"><h3 class="stat-section-title">월별 조과</h3><div class="month-chart">
+      ${months.map(([m,c]) => `<div class="month-col"><span class="month-val">${c}</span><div class="month-bar" style="height:${(c/mMax)*100}px"></div><span class="month-label">${m.slice(5)}월</span></div>`).join('')}
+    </div></div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ── Data (Export/Import) ──
+function renderData() {
+  return `
+  <div class="data-section">
+    <h2 class="data-title">데이터 관리</h2>
+    <p class="data-desc">CSV 파일로 내보내면 엑셀에서 열 수 있고,<br>다른 기기로 옮기거나 백업할 수 있습니다.</p>
+    <button class="data-btn primary" onclick="exportCSV()">📥 CSV 파일로 내보내기</button>
+    <button class="data-btn" onclick="document.getElementById('csvFileInput').click()">📤 CSV 파일 불러오기</button>
+    <p class="data-desc" style="margin-top:8px">현재 ${records.length}건의 기록이 저장되어 있습니다.</p>
+    <div class="data-danger">
+      <button class="data-btn danger" onclick="confirmReset()">🗑 전체 데이터 초기화</button>
+    </div>
+  </div>`;
+}
+
+function exportCSV() {
+  if (records.length === 0) { toast('내보낼 기록이 없습니다'); return; }
+  const headers = ['날짜','장소','어종','크기(cm)','마릿수','선박명','선비(천원)','부대비용_내역','부대비용_금액(천원)','총비용(원)','메모'];
+  const rows = records.map(r => {
+    const extraDescs = (r.extraItems||[]).map(i => i.desc||'').join(';');
+    const extraAmounts = (r.extraItems||[]).map(i => i.amount||0).join(';');
+    return [
+      r.date, r.location, r.species, r.sizeCm||'', r.count||0,
+      r.boatName||'', r.boatFee||'',
+      extraDescs, extraAmounts,
+      getGrandTotal(r), r.memo||''
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+
+  const bom = '\uFEFF';
+  const csv = bom + headers.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `조과기록_${getToday()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV 파일이 다운로드됩니다');
+}
+
+document.getElementById('csvFileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const text = ev.target.result;
+      const lines = text.split('\n').filter(l => l.trim());
+      if (lines.length < 2) { toast('유효한 CSV 파일이 아닙니다'); return; }
+
+      const imported = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (cols.length < 9) continue;
+        const extraDescs = cols[7] ? cols[7].split(';') : [];
+        const extraAmounts = cols[8] ? cols[8].split(';') : [];
+        const extraItems = [];
+        for (let j = 0; j < Math.max(extraDescs.length, extraAmounts.length); j++) {
+          const desc = extraDescs[j]||'';
+          const amt = num(extraAmounts[j]);
+          if (desc || amt) extraItems.push({desc, amount: amt});
+        }
+        imported.push({
+          id: genId(),
+          date: cols[0] || getToday(),
+          location: cols[1] || '',
+          species: cols[2] || '',
+          sizeCm: num(cols[3]) || null,
+          count: num(cols[4]),
+          boatName: cols[5] || '',
+          boatFee: num(cols[6]) || null,
+          extraItems,
+          memo: cols[10] || '',
+        });
+      }
+      if (imported.length === 0) { toast('가져올 수 있는 데이터가 없습니다'); return; }
+      records = [...imported, ...records];
+      save();
+      toast(`${imported.length}건의 기록을 불러왔습니다`);
+      render();
+    } catch(err) {
+      toast('파일 읽기 오류가 발생했습니다');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuote) {
+      if (ch === '"' && line[i+1] === '"') { current += '"'; i++; }
+      else if (ch === '"') { inQuote = false; }
+      else { current += ch; }
+    } else {
+      if (ch === '"') { inQuote = true; }
+      else if (ch === ',') { result.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function confirmReset() {
+  if (confirm('정말 모든 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+    records = [];
+    save();
+    toast('데이터가 초기화되었습니다');
+    render();
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+});
+</script>
+</body>
+</html>
