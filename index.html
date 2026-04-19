@@ -358,7 +358,7 @@ function getExtraTotal(items) {
 }
 
 function getGrandTotal(r) {
-  return (num(r.boatFee) + getExtraTotal(r.extraItems)) * 1000;
+  return num(r.boatFee) + getExtraTotal(r.extraItems);
 }
 
 function toast(msg) {
@@ -439,8 +439,8 @@ function renderList() {
         </div>` : ''}
       ${(r.extraItems && r.extraItems.length > 0) ? `
         <div class="card-extra-items">
-          ${r.boatFee ? `<span class="card-extra-tag">선비 ${(r.boatFee*1000).toLocaleString()}</span>` : ''}
-          ${r.extraItems.map(i => (i.desc||i.amount) ? `<span class="card-extra-tag">${esc(i.desc||'기타')} ${i.amount ? (num(i.amount)*1000).toLocaleString() : ''}</span>` : '').join('')}
+          ${r.boatFee ? `<span class="card-extra-tag">선비 ${Number(r.boatFee).toLocaleString()}원</span>` : ''}
+          ${r.extraItems.map(i => (i.desc||i.amount) ? `<span class="card-extra-tag">${esc(i.desc||'기타')} ${i.amount ? num(i.amount).toLocaleString()+'원' : ''}</span>` : '').join('')}
         </div>` : ''}
       ${r.memo ? `<p class="card-memo">${esc(r.memo)}</p>` : ''}
       <div class="card-actions">
@@ -518,8 +518,8 @@ function renderForm() {
 
     <label class="lbl">선비 (선택)</label>
     <div class="cost-field">
-      <input type="number" class="cost-input" id="f-boatfee" placeholder="0" value="${boatFee}" inputmode="numeric" oninput="updateFormTotal()">
-      <span class="cost-unit">천원</span>
+      <input type="number" class="cost-input" id="f-boatfee" placeholder="예: 80000" value="${boatFee}" inputmode="numeric" oninput="updateFormTotal()">
+      <span class="cost-unit">원</span>
     </div>
 
     <div class="extra-header">
@@ -552,8 +552,8 @@ function extraItemHTML(idx, desc, amount) {
   <div class="extra-item-row" data-idx="${idx}">
     <input type="text" class="extra-desc-input" placeholder="내역 (예: 미끼)" value="${esc(desc||'')}" oninput="updateFormTotal()">
     <div class="extra-amount-wrap">
-      <input type="number" class="extra-amount-input" placeholder="0" value="${amount||''}" inputmode="numeric" oninput="updateFormTotal()">
-      <span class="cost-unit">천원</span>
+      <input type="number" class="extra-amount-input" placeholder="예: 20000" value="${amount||''}" inputmode="numeric" oninput="updateFormTotal()">
+      <span class="cost-unit">원</span>
     </div>
     <button class="remove-item-btn" onclick="removeExtraItem(${idx})">✕</button>
   </div>`;
@@ -593,7 +593,7 @@ function updateFormTotal() {
   const boatFee = num(feeEl.value);
   const items = getFormExtraItems();
   const extraSum = items.reduce((s,i) => s + num(i.amount), 0);
-  const total = (boatFee + extraSum) * 1000;
+  const total = boatFee + extraSum;
   if (boatFee || extraSum > 0) {
     wrap.style.display = 'block';
     val.textContent = total.toLocaleString() + '원';
@@ -661,8 +661,8 @@ function renderStats() {
   const totalTrips = records.length;
   const totalFish = records.reduce((s,r) => s + num(r.count), 0);
   const avg = totalTrips > 0 ? (totalFish/totalTrips).toFixed(1) : 0;
-  const totalBoatFee = records.reduce((s,r) => s + num(r.boatFee), 0) * 1000;
-  const totalExtra = records.reduce((s,r) => s + getExtraTotal(r.extraItems), 0) * 1000;
+  const totalBoatFee = records.reduce((s,r) => s + num(r.boatFee), 0);
+  const totalExtra = records.reduce((s,r) => s + getExtraTotal(r.extraItems), 0);
   const totalCost = totalBoatFee + totalExtra;
   const costPerFish = totalFish > 0 ? Math.round(totalCost / totalFish) : 0;
 
@@ -745,7 +745,7 @@ function renderData() {
 
 function exportCSV() {
   if (records.length === 0) { toast('내보낼 기록이 없습니다'); return; }
-  const headers = ['날짜','장소','어종','크기(cm)','마릿수','선박명','선비(천원)','부대비용_내역','부대비용_금액(천원)','총비용(원)','메모'];
+  const headers = ['날짜','장소','어종','크기(cm)','마릿수','선박명','선비(원)','부대비용_내역','부대비용_금액(원)','총비용(원)','메모'];
   const rows = records.map(r => {
     const extraDescs = (r.extraItems||[]).map(i => i.desc||'').join(';');
     const extraAmounts = (r.extraItems||[]).map(i => i.amount||0).join(';');
