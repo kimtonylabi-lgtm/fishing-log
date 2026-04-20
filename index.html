@@ -181,7 +181,7 @@
   }
   .catch-item {
     background:#f8f6f2; border-radius:14px; padding:14px; margin-bottom:10px;
-    position:relative; border:1px solid var(--border);
+    border:1px solid var(--border); overflow:hidden;
   }
   .catch-item-header { display:flex; align-items:center; gap:8px; }
   .catch-item-num {
@@ -189,33 +189,33 @@
     color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center;
     justify-content:center; flex-shrink:0;
   }
-  .catch-species-row { display:flex; gap:8px; align-items:center; flex:1; }
+  .catch-species-row { display:flex; gap:6px; align-items:center; flex:1; min-width:0; }
   .catch-species-input {
-    flex:1; padding:12px 12px; border:1.5px solid var(--border); border-radius:10px;
+    flex:1; padding:12px 10px; border:1.5px solid var(--border); border-radius:10px;
     font-size:16px; background:#fff; font-family:inherit; outline:none; min-width:0;
     -webkit-appearance:none;
   }
   .catch-select-btn {
     background:var(--accent); color:#fff; border:none; border-radius:10px;
-    padding:12px 14px; font-size:14px; font-weight:600; cursor:pointer;
-    font-family:inherit; white-space:nowrap;
+    padding:12px 12px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:inherit; white-space:nowrap; flex-shrink:0;
+  }
+  .catch-remove-btn {
+    background:var(--sand); border:none; border-radius:8px;
+    font-size:14px; color:var(--muted); cursor:pointer; padding:12px 10px;
+    line-height:1; flex-shrink:0;
   }
   .catch-detail-row { display:flex; gap:8px; margin-top:10px; padding-left:34px; }
   .catch-detail-field {
     flex:1; display:flex; align-items:center; background:#fff;
-    border:1.5px solid var(--border); border-radius:10px; padding:0 12px; gap:4px;
+    border:1.5px solid var(--border); border-radius:10px; padding:0 10px; gap:4px; min-width:0;
   }
   .catch-detail-input {
     flex:1; border:none; outline:none; font-size:16px; padding:12px 0;
     background:transparent; font-family:inherit; text-align:right; min-width:0;
-    -webkit-appearance:none;
+    -webkit-appearance:none; width:100%;
   }
   .catch-detail-unit { font-size:13px; color:var(--muted); white-space:nowrap; }
-  .catch-remove {
-    position:absolute; top:10px; right:10px; background:var(--sand); border:none;
-    font-size:16px; color:var(--muted); cursor:pointer; padding:4px 8px;
-    border-radius:8px; line-height:1;
-  }
   .extra-item-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
   .extra-desc-input {
     flex:1; padding:12px 12px; border:1.5px solid var(--border); border-radius:10px;
@@ -803,12 +803,12 @@ function pickSpeciesFor(s) {
 function catchItemHTML(idx, species, count, sizeCm) {
   return `
   <div class="catch-item" data-cidx="${idx}">
-    <button class="catch-remove" onclick="removeCatchItem(this)">✕</button>
     <div class="catch-item-header">
       <span class="catch-item-num">${idx + 1}</span>
       <div class="catch-species-row">
         <input type="text" class="catch-species-input" placeholder="어종 입력" value="${esc(species||'')}" autocomplete="off">
         <button class="catch-select-btn" onclick="openSpeciesDD(${idx})">선택</button>
+        <button class="catch-remove-btn" onclick="removeCatchItem(this)">✕</button>
       </div>
     </div>
     <div class="catch-detail-row">
