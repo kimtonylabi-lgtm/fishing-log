@@ -467,6 +467,7 @@ function getGrandTotal(r) {
 }
 
 function getTotalFish(r) {
+  if (!r) return 0;
   if (r.catches && r.catches.length > 0) {
     return r.catches.reduce((s, c) => s + num(c.count), 0);
   }
@@ -474,6 +475,7 @@ function getTotalFish(r) {
 }
 
 function getAllCatches(r) {
+  if (!r) return [];
   if (r.catches && r.catches.length > 0) return r.catches;
   if (r.species) return [{ species: r.species, count: r.count || 0, sizeCm: r.sizeCm || null }];
   return [];
