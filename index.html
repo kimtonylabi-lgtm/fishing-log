@@ -88,7 +88,16 @@
   .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   .card-date { font-size:13px; font-weight:600; color:var(--accent); }
   .card-location { font-size:12px; color:var(--text-mid); background:var(--sand); padding:3px 10px; border-radius:20px; }
-  .card-body { display:flex; justify-content:space-between; align-items:center; }
+  .card-body { }
+  .card-catches { display:flex; flex-direction:column; gap:6px; }
+  .card-catch-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:4px 0;
+  }
+  .card-catch-species { font-size:15px; font-weight:700; }
+  .card-catch-detail { display:flex; gap:4px; }
+  .badge-sm { font-size:12px; font-weight:600; color:var(--accent); background:#e6f2f4; padding:2px 8px; border-radius:14px; }
+  .card-total-fish { text-align:right; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
   .card-species { display:flex; align-items:center; gap:6px; }
   .card-species-text { font-size:17px; font-weight:700; }
   .card-stats { display:flex; gap:6px; }
@@ -168,6 +177,42 @@
     background:none; border:1.5px dashed #c0bab0; border-radius:8px;
     padding:5px 12px; font-size:12px; color:var(--accent); font-weight:600;
     cursor:pointer; font-family:inherit;
+  }
+  .catch-item {
+    background:#f8f6f2; border-radius:12px; padding:12px; margin-bottom:8px;
+    position:relative;
+  }
+  .catch-item-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .catch-item-num {
+    width:24px; height:24px; border-radius:50%; background:var(--accent);
+    color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center;
+    justify-content:center; flex-shrink:0;
+  }
+  .catch-species-row { display:flex; gap:8px; align-items:center; flex:1; }
+  .catch-species-input {
+    flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:15px; background:#fff; font-family:inherit; outline:none; min-width:0;
+    -webkit-appearance:none;
+  }
+  .catch-select-btn {
+    background:var(--accent); color:#fff; border:none; border-radius:10px;
+    padding:10px 12px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:inherit; white-space:nowrap;
+  }
+  .catch-detail-row { display:flex; gap:8px; margin-top:8px; margin-left:32px; }
+  .catch-detail-field {
+    flex:1; display:flex; align-items:center; background:#fff;
+    border:1.5px solid var(--border); border-radius:10px; padding:0 10px; gap:4px;
+  }
+  .catch-detail-input {
+    flex:1; border:none; outline:none; font-size:15px; padding:10px 0;
+    background:transparent; font-family:inherit; text-align:right; min-width:0;
+    -webkit-appearance:none;
+  }
+  .catch-detail-unit { font-size:13px; color:var(--muted); white-space:nowrap; }
+  .catch-remove {
+    position:absolute; top:8px; right:8px; background:none; border:none;
+    font-size:18px; color:var(--muted); cursor:pointer; padding:4px 6px;
   }
   .extra-item-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
   .extra-desc-input {
@@ -267,6 +312,29 @@
     pointer-events:none; max-width:90%;
   }
   .toast.show { opacity:1; }
+
+  /* ── Tidal Info ── */
+  .tidal-info {
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(135deg,#e6f2f4,#f0f7f8);
+    border-radius:10px; padding:12px 14px; margin-top:8px;
+  }
+  .tidal-emoji { font-size:24px; }
+  .tidal-main { flex:1; }
+  .tidal-phase { font-size:16px; font-weight:700; color:var(--accent); }
+  .tidal-status { font-size:12px; color:var(--text-mid); margin-left:6px; }
+  .tidal-lunar { font-size:11px; color:var(--muted); margin-top:2px; }
+  .tidal-bar { display:flex; gap:3px; align-items:center; }
+  .tidal-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--border);
+  }
+  .tidal-dot.filled { background:var(--accent); }
+  .tidal-bar-label { font-size:10px; color:var(--muted); margin-left:4px; }
+  .card-tidal {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:12px; color:var(--accent); font-weight:600;
+  }
 </style>
 </head>
 <body>
@@ -353,12 +421,62 @@ function fmtDate(ds) {
 
 function num(v) { return Number(v) || 0; }
 
+// ── 물때 계산 (음력 기반) ──
+function getLunarDay(dateStr) {
+  // 천문학적 삭(新月) 기준 계산
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const JD = d.getTime() / 86400000 + 2440587.5;
+  const refNewMoon = 2451550.1; // 2000-01-06 기준 삭
+  const synodic = 29.530588853;
+  const age = ((JD - refNewMoon) % synodic + synodic) % synodic;
+  return Math.floor(age) + 1;
+}
+
+function getTidalPhase(lunarDay) {
+  // 음력 1일 = 8물
+  return ((lunarDay - 1 + 7) % 15) + 1;
+}
+
+function getTidalInfo(dateStr) {
+  if (!dateStr) return null;
+  const lunarDay = getLunarDay(dateStr);
+  const phase = getTidalPhase(lunarDay);
+  let label = phase + '물';
+  let status = '';
+  let emoji = '🌊';
+  if (phase >= 6 && phase <= 8) { status = '사리'; emoji = '🌊'; }
+  else if (phase >= 13 || phase <= 1) { status = '조금'; emoji = '🏖️'; }
+  else if (phase >= 2 && phase <= 5) { status = '중물'; emoji = '〰️'; }
+  else { status = '중물'; emoji = '〰️'; }
+  // 물 세기 표시 (5단계)
+  let strength;
+  if (phase >= 6 && phase <= 8) strength = 5; // 사리 - 최강
+  else if (phase === 5 || phase === 9) strength = 4;
+  else if (phase === 4 || phase === 10) strength = 3;
+  else if (phase === 3 || phase === 11) strength = 2;
+  else strength = 1; // 조금 - 최약
+  return { lunarDay, phase, label, status, emoji, strength };
+}
+
 function getExtraTotal(items) {
   return (items || []).reduce((s,i) => s + num(i.amount), 0);
 }
 
 function getGrandTotal(r) {
   return num(r.boatFee) + getExtraTotal(r.extraItems);
+}
+
+function getTotalFish(r) {
+  if (r.catches && r.catches.length > 0) {
+    return r.catches.reduce((s, c) => s + num(c.count), 0);
+  }
+  return num(r.count); // 기존 데이터 호환
+}
+
+function getAllCatches(r) {
+  if (r.catches && r.catches.length > 0) return r.catches;
+  if (r.species) return [{ species: r.species, count: r.count || 0, sizeCm: r.sizeCm || null }];
+  return [];
 }
 
 function toast(msg) {
@@ -371,7 +489,7 @@ function toast(msg) {
 function updateHeader() {
   const el = document.getElementById('headerSub');
   if (records.length === 0) { el.textContent = '첫 조과를 기록해보세요!'; return; }
-  const totalFish = records.reduce((s,r) => s + num(r.count), 0);
+  const totalFish = records.reduce((s,r) => s + getTotalFish(r), 0);
   const totalCost = records.reduce((s,r) => s + getGrandTotal(r), 0);
   el.textContent = `총 ${records.length}회 출조 · ${totalFish}마리 · ${totalCost.toLocaleString()}원`;
 }
@@ -414,23 +532,33 @@ function renderList() {
     const grand = getGrandTotal(r);
     const hasCost = r.boatFee || extraTotal > 0;
     const isConfirm = confirmDeleteId === r.id;
+    const tidal = getTidalInfo(r.date);
     return `
     <div class="card">
       <div class="card-header">
-        <span class="card-date">${fmtDate(r.date)}</span>
+        <span class="card-date">${fmtDate(r.date)}${tidal ? ` <span class="card-tidal">${tidal.emoji} ${tidal.label}</span>` : ''}</span>
         <span class="card-location">${esc(r.location)}</span>
       </div>
       <div class="card-body">
-        <div class="card-species">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round">
-            <path d="M6.5 12c3-6 11-6 14.5 0c-3.5 6-11.5 6-14.5 0z"/><circle cx="17" cy="12" r="1" fill="var(--accent)" stroke="none"/><path d="M2 12l4.5-3v6L2 12z"/>
-          </svg>
-          <span class="card-species-text">${esc(r.species)}</span>
-        </div>
-        <div class="card-stats">
-          ${r.sizeCm ? `<span class="badge">${r.sizeCm}cm</span>` : ''}
-          <span class="badge">${num(r.count)}마리</span>
-        </div>
+        ${(() => {
+          const catches = getAllCatches(r);
+          const total = catches.reduce((s,c) => s + num(c.count), 0);
+          return `
+            <div class="card-catches">
+              ${catches.map(c => `
+                <div class="card-catch-row">
+                  <span class="card-catch-species">${esc(c.species)}</span>
+                  <span class="card-catch-detail">
+                    ${c.sizeCm ? `<span class="badge-sm">${c.sizeCm}cm</span>` : ''}
+                    <span class="badge-sm">${num(c.count)}마리</span>
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="card-total-fish">
+              <span class="badge">합계 ${total}마리</span>
+            </div>`;
+        })()}
       </div>
       ${(r.boatName || hasCost) ? `
         <div class="card-cost-row">
@@ -474,9 +602,8 @@ function renderForm() {
   const isEdit = !!r;
   const date = r?.date || getToday();
   const location = r?.location || '';
-  const species = r?.species || '';
-  const sizeCm = r?.sizeCm || '';
-  const count = r?.count ?? '';
+  const catches = getAllCatches(r);
+  const initCatches = catches.length > 0 ? catches : [{ species: '', count: '', sizeCm: '' }];
   const boatName = r?.boatName || '';
   const boatFee = r?.boatFee || '';
   const extraItems = r?.extraItems || [];
@@ -487,7 +614,8 @@ function renderForm() {
     <h2 class="form-title">${isEdit ? '기록 수정' : '조과 기록하기'}</h2>
 
     <label class="lbl">날짜</label>
-    <input type="date" class="inp" id="f-date" value="${date}">
+    <input type="date" class="inp" id="f-date" value="${date}" onchange="updateTidalDisplay()">
+    <div id="tidalDisplay">${renderTidalInfo(date)}</div>
 
     <label class="lbl">장소</label>
     <div class="preset-row">
@@ -495,23 +623,20 @@ function renderForm() {
     </div>
     <input type="text" class="inp" id="f-location" placeholder="상세 장소 (예: 통영 방파제)" value="${esc(location)}">
 
-    <label class="lbl">어종</label>
-    <div style="display:flex;gap:8px">
-      <input type="text" class="inp" id="f-species" placeholder="직접 입력 또는 선택 →" value="${esc(species)}" autocomplete="off" style="flex:1">
-      <button class="preset-chip active" onclick="showSpeciesDD()" style="white-space:nowrap;flex-shrink:0">어종 선택</button>
+    <div class="extra-header">
+      <label class="lbl" style="margin:0">조과</label>
+      <button class="add-item-btn" onclick="addCatchItem()">+ 어종 추가</button>
     </div>
+    <div id="catchItemsWrap">
+      ${initCatches.map((c,i) => catchItemHTML(i, c.species, c.count, c.sizeCm)).join('')}
+    </div>
+
     <div class="overlay hidden" id="speciesOverlay" onclick="hideSpeciesDD()"></div>
     <div class="dropdown hidden" id="speciesDD">
       <div class="dropdown-title">어종 선택</div>
-      ${SPECIES.map(s => `<button class="dropdown-item" onclick="pickSpecies('${s}')">${s}</button>`).join('')}
+      ${SPECIES.map(s => `<button class="dropdown-item" onclick="pickSpeciesFor('${s}')">${s}</button>`).join('')}
       <button class="dropdown-close" onclick="hideSpeciesDD()">닫기</button>
     </div>
-
-    <label class="lbl">크기 (cm)</label>
-    <input type="number" class="inp" id="f-size" placeholder="예: 35" value="${sizeCm}" inputmode="decimal">
-
-    <label class="lbl">마릿수</label>
-    <input type="number" class="inp" id="f-count" placeholder="예: 5" value="${count}" inputmode="numeric">
 
     <label class="lbl">선박명 (선택)</label>
     <input type="text" class="inp" id="f-boat" placeholder="예: 해적호" value="${esc(boatName)}">
@@ -602,6 +727,35 @@ function updateFormTotal() {
   }
 }
 
+function renderTidalInfo(dateStr) {
+  const info = getTidalInfo(dateStr);
+  if (!info) return '';
+  const dots = Array.from({length:5}, (_,i) =>
+    `<span class="tidal-dot ${i < info.strength ? 'filled' : ''}"></span>`
+  ).join('');
+  return `
+    <div class="tidal-info">
+      <span class="tidal-emoji">${info.emoji}</span>
+      <div class="tidal-main">
+        <div>
+          <span class="tidal-phase">${info.label}</span>
+          <span class="tidal-status">${info.status}</span>
+        </div>
+        <div class="tidal-lunar">음력 ${info.lunarDay}일 기준</div>
+      </div>
+      <div>
+        <div class="tidal-bar">${dots}<span class="tidal-bar-label">물세기</span></div>
+      </div>
+    </div>`;
+}
+
+function updateTidalDisplay() {
+  const dateVal = document.getElementById('f-date')?.value;
+  const wrap = document.getElementById('tidalDisplay');
+  if (!wrap || !dateVal) return;
+  wrap.innerHTML = renderTidalInfo(dateVal);
+}
+
 function pickLocation(loc) {
   document.getElementById('f-location').value = loc;
   document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
@@ -611,6 +765,12 @@ function pickLocation(loc) {
 }
 
 function showSpeciesDD() {
+  openSpeciesDD(0);
+}
+
+let activeSpeciesIdx = 0;
+function openSpeciesDD(idx) {
+  activeSpeciesIdx = idx;
   document.getElementById('speciesDD').classList.remove('hidden');
   document.getElementById('speciesOverlay').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -620,23 +780,75 @@ function hideSpeciesDD() {
   document.getElementById('speciesOverlay').classList.add('hidden');
   document.body.style.overflow = '';
 }
-function pickSpecies(s) {
-  document.getElementById('f-species').value = s;
+function pickSpeciesFor(s) {
+  const items = document.querySelectorAll('#catchItemsWrap .catch-item');
+  if (items[activeSpeciesIdx]) {
+    items[activeSpeciesIdx].querySelector('.catch-species-input').value = s;
+  }
   hideSpeciesDD();
 }
 
+function catchItemHTML(idx, species, count, sizeCm) {
+  return `
+  <div class="catch-item" data-cidx="${idx}">
+    <button class="catch-remove" onclick="removeCatchItem(this)">✕</button>
+    <div class="catch-item-header">
+      <span class="catch-item-num">${idx + 1}</span>
+      <div class="catch-species-row">
+        <input type="text" class="catch-species-input" placeholder="어종 입력" value="${esc(species||'')}" autocomplete="off">
+        <button class="catch-select-btn" onclick="openSpeciesDD(${idx})">선택</button>
+      </div>
+    </div>
+    <div class="catch-detail-row">
+      <div class="catch-detail-field">
+        <input type="number" class="catch-detail-input" data-field="count" placeholder="0" value="${count||''}" inputmode="numeric">
+        <span class="catch-detail-unit">마리</span>
+      </div>
+      <div class="catch-detail-field">
+        <input type="number" class="catch-detail-input" data-field="size" placeholder="최대" value="${sizeCm||''}" inputmode="decimal">
+        <span class="catch-detail-unit">cm</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addCatchItem() {
+  const wrap = document.getElementById('catchItemsWrap');
+  const idx = wrap.children.length;
+  wrap.insertAdjacentHTML('beforeend', catchItemHTML(idx, '', '', ''));
+}
+
+function removeCatchItem(btn) {
+  const wrap = document.getElementById('catchItemsWrap');
+  if (wrap.children.length <= 1) { toast('최소 1개 어종은 있어야 합니다'); return; }
+  btn.closest('.catch-item').remove();
+  wrap.querySelectorAll('.catch-item').forEach((el, i) => {
+    el.querySelector('.catch-item-num').textContent = i + 1;
+  });
+}
+
+function getFormCatches() {
+  const items = document.querySelectorAll('#catchItemsWrap .catch-item');
+  const catches = [];
+  items.forEach(el => {
+    const species = el.querySelector('.catch-species-input').value.trim();
+    const count = num(el.querySelector('[data-field="count"]').value);
+    const sizeCm = num(el.querySelector('[data-field="size"]').value) || null;
+    if (species) catches.push({ species, count, sizeCm });
+  });
+  return catches;
+}
+
 function submitForm() {
-  const species = document.getElementById('f-species').value.trim();
   const location = document.getElementById('f-location').value.trim();
-  if (!species || !location) { toast('어종과 장소를 입력해주세요'); return; }
+  const catches = getFormCatches();
+  if (catches.length === 0 || !location) { toast('어종과 장소를 입력해주세요'); return; }
 
   const record = {
     id: editingId || genId(),
     date: document.getElementById('f-date').value,
     location,
-    species,
-    sizeCm: num(document.getElementById('f-size').value) || null,
-    count: num(document.getElementById('f-count').value),
+    catches,
     boatName: document.getElementById('f-boat').value.trim(),
     boatFee: num(document.getElementById('f-boatfee').value) || null,
     extraItems: getFormExtraItems(),
@@ -659,17 +871,19 @@ function renderStats() {
   if (records.length === 0) return `<div class="empty"><p>기록이 쌓이면 통계를 볼 수 있어요</p></div>`;
 
   const totalTrips = records.length;
-  const totalFish = records.reduce((s,r) => s + num(r.count), 0);
+  const totalFish = records.reduce((s,r) => s + getTotalFish(r), 0);
   const avg = totalTrips > 0 ? (totalFish/totalTrips).toFixed(1) : 0;
   const totalBoatFee = records.reduce((s,r) => s + num(r.boatFee), 0);
   const totalExtra = records.reduce((s,r) => s + getExtraTotal(r.extraItems), 0);
   const totalCost = totalBoatFee + totalExtra;
   const costPerFish = totalFish > 0 ? Math.round(totalCost / totalFish) : 0;
 
-  // Species
+  // Species (from all catches)
   const sMap = {};
-  records.forEach(r => { sMap[r.species] = (sMap[r.species]||0) + num(r.count); });
-  const sRank = Object.entries(sMap).sort((a,b) => b[1]-a[1]).slice(0,5);
+  records.forEach(r => {
+    getAllCatches(r).forEach(c => { sMap[c.species] = (sMap[c.species]||0) + num(c.count); });
+  });
+  const sRank = Object.entries(sMap).sort((a,b) => b[1]-a[1]).slice(0,8);
   const sMax = sRank[0]?.[1] || 1;
 
   // Location
@@ -677,13 +891,19 @@ function renderStats() {
   records.forEach(r => { lMap[r.location] = (lMap[r.location]||0) + 1; });
   const lRank = Object.entries(lMap).sort((a,b) => b[1]-a[1]).slice(0,5);
 
-  // Biggest
-  const wSize = records.filter(r => r.sizeCm);
-  const big = wSize.length > 0 ? wSize.reduce((m,r) => r.sizeCm > m.sizeCm ? r : m, wSize[0]) : null;
+  // Biggest (from all catches)
+  let big = null;
+  records.forEach(r => {
+    getAllCatches(r).forEach(c => {
+      if (c.sizeCm && (!big || c.sizeCm > big.sizeCm)) {
+        big = { sizeCm: c.sizeCm, species: c.species, location: r.location, date: r.date };
+      }
+    });
+  });
 
   // Monthly
   const mMap = {};
-  records.forEach(r => { const m = r.date.slice(0,7); mMap[m] = (mMap[m]||0) + num(r.count); });
+  records.forEach(r => { const m = r.date.slice(0,7); mMap[m] = (mMap[m]||0) + getTotalFish(r); });
   const months = Object.entries(mMap).sort((a,b) => a[0].localeCompare(b[0])).slice(-6);
   const mMax = Math.max(...months.map(m => m[1]), 1);
 
@@ -745,16 +965,33 @@ function renderData() {
 
 function exportCSV() {
   if (records.length === 0) { toast('내보낼 기록이 없습니다'); return; }
-  const headers = ['날짜','장소','어종','크기(cm)','마릿수','선박명','선비(원)','부대비용_내역','부대비용_금액(원)','총비용(원)','메모'];
-  const rows = records.map(r => {
+  const headers = ['날짜','물때','장소','어종','크기(cm)','마릿수','선박명','선비(원)','부대비용_내역','부대비용_금액(원)','총비용(원)','메모'];
+  const rows = [];
+  records.forEach(r => {
+    const catches = getAllCatches(r);
     const extraDescs = (r.extraItems||[]).map(i => i.desc||'').join(';');
     const extraAmounts = (r.extraItems||[]).map(i => i.amount||0).join(';');
-    return [
-      r.date, r.location, r.species, r.sizeCm||'', r.count||0,
-      r.boatName||'', r.boatFee||'',
-      extraDescs, extraAmounts,
-      getGrandTotal(r), r.memo||''
-    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+    const tidal = getTidalInfo(r.date);
+    const tidalStr = tidal ? tidal.label + ' ' + tidal.status : '';
+    if (catches.length === 0) {
+      rows.push([r.date, tidalStr, r.location, '', '', 0,
+        r.boatName||'', r.boatFee||'', extraDescs, extraAmounts,
+        getGrandTotal(r), r.memo||''
+      ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    } else {
+      catches.forEach((c, ci) => {
+        rows.push([
+          r.date, tidalStr, r.location,
+          c.species, c.sizeCm||'', c.count||0,
+          ci === 0 ? (r.boatName||'') : '',
+          ci === 0 ? (r.boatFee||'') : '',
+          ci === 0 ? extraDescs : '',
+          ci === 0 ? extraAmounts : '',
+          ci === 0 ? getGrandTotal(r) : '',
+          ci === 0 ? (r.memo||'') : ''
+        ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+      });
+    }
   });
 
   const bom = '\uFEFF';
@@ -780,29 +1017,45 @@ document.getElementById('csvFileInput').addEventListener('change', function(e) {
       if (lines.length < 2) { toast('유효한 CSV 파일이 아닙니다'); return; }
 
       const imported = [];
+      let currentRec = null;
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
-        if (cols.length < 9) continue;
-        const extraDescs = cols[7] ? cols[7].split(';') : [];
-        const extraAmounts = cols[8] ? cols[8].split(';') : [];
-        const extraItems = [];
-        for (let j = 0; j < Math.max(extraDescs.length, extraAmounts.length); j++) {
-          const desc = extraDescs[j]||'';
-          const amt = num(extraAmounts[j]);
-          if (desc || amt) extraItems.push({desc, amount: amt});
+        if (cols.length < 6) continue;
+        // cols: 날짜,물때,장소,어종,크기,마릿수,선박명,선비,부대내역,부대금액,총비용,메모
+        const date = cols[0] || '';
+        const location = cols[2] || '';
+        const species = cols[3] || '';
+        const sizeCm = num(cols[4]) || null;
+        const count = num(cols[5]);
+        const boatName = cols[6] || '';
+        const boatFee = num(cols[7]) || null;
+        const memo = cols[11] || '';
+
+        // 선박명/선비/메모가 있으면 새 레코드 시작
+        if (boatName || boatFee || memo || !currentRec || currentRec.date !== date || currentRec.location !== location) {
+          const extraDescs = cols[8] ? cols[8].split(';') : [];
+          const extraAmounts = cols[9] ? cols[9].split(';') : [];
+          const extraItems = [];
+          for (let j = 0; j < Math.max(extraDescs.length, extraAmounts.length); j++) {
+            const desc = extraDescs[j]||'';
+            const amt = num(extraAmounts[j]);
+            if (desc || amt) extraItems.push({desc, amount: amt});
+          }
+          currentRec = {
+            id: genId(),
+            date: date || getToday(),
+            location,
+            catches: [],
+            boatName,
+            boatFee,
+            extraItems,
+            memo,
+          };
+          imported.push(currentRec);
         }
-        imported.push({
-          id: genId(),
-          date: cols[0] || getToday(),
-          location: cols[1] || '',
-          species: cols[2] || '',
-          sizeCm: num(cols[3]) || null,
-          count: num(cols[4]),
-          boatName: cols[5] || '',
-          boatFee: num(cols[6]) || null,
-          extraItems,
-          memo: cols[10] || '',
-        });
+        if (species) {
+          currentRec.catches.push({ species, count, sizeCm });
+        }
       }
       if (imported.length === 0) { toast('가져올 수 있는 데이터가 없습니다'); return; }
       records = [...imported, ...records];
