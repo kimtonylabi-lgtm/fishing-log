@@ -50,19 +50,19 @@
   .wave { display:block; opacity:0.15; }
 
   /* ── Content ── */
-  .content { flex:1; padding-bottom:80px; }
+  .content { flex:1; padding-bottom:100px; }
 
   /* ── Nav ── */
   .nav {
     position:fixed; bottom:0; left:50%; transform:translateX(-50%);
     width:100%; max-width:480px;
     background:#fff; display:flex; justify-content:space-around; align-items:flex-end;
-    padding:6px 0 env(safe-area-inset-bottom, 8px);
+    padding:8px 0 calc(env(safe-area-inset-bottom, 8px) + 4px);
     border-top:1px solid #e8e3da; z-index:100;
   }
   .nav-btn {
     background:none; border:none; display:flex; flex-direction:column;
-    align-items:center; cursor:pointer; padding:4px 16px; gap:2px;
+    align-items:center; cursor:pointer; padding:6px 14px; gap:3px;
     font-family:inherit; font-size:11px; color:var(--muted);
   }
   .nav-btn.active { color:var(--accent); }
@@ -82,22 +82,22 @@
   /* ── Card List ── */
   .list-wrap { padding:12px 16px; }
   .card {
-    background:var(--card); border-radius:14px; padding:16px; margin-bottom:10px;
-    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+    background:var(--card); border-radius:16px; padding:18px; margin-bottom:12px;
+    box-shadow:0 1px 6px rgba(0,0,0,0.06);
   }
   .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   .card-date { font-size:13px; font-weight:600; color:var(--accent); }
   .card-location { font-size:12px; color:var(--text-mid); background:var(--sand); padding:3px 10px; border-radius:20px; }
-  .card-body { }
-  .card-catches { display:flex; flex-direction:column; gap:6px; }
+  .card-body { margin-top:4px; }
+  .card-catches { display:flex; flex-direction:column; gap:8px; }
   .card-catch-row {
     display:flex; justify-content:space-between; align-items:center;
-    padding:4px 0;
+    padding:2px 0;
   }
   .card-catch-species { font-size:15px; font-weight:700; }
-  .card-catch-detail { display:flex; gap:4px; }
-  .badge-sm { font-size:12px; font-weight:600; color:var(--accent); background:#e6f2f4; padding:2px 8px; border-radius:14px; }
-  .card-total-fish { text-align:right; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+  .card-catch-detail { display:flex; gap:5px; }
+  .badge-sm { font-size:12px; font-weight:600; color:var(--accent); background:#e6f2f4; padding:3px 9px; border-radius:14px; }
+  .card-total-fish { text-align:right; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
   .card-species { display:flex; align-items:center; gap:6px; }
   .card-species-text { font-size:17px; font-weight:700; }
   .card-stats { display:flex; gap:6px; }
@@ -116,9 +116,10 @@
   .confirm-no { background:#eee; border:none; border-radius:6px; padding:3px 10px; font-size:12px; cursor:pointer; font-family:inherit; }
 
   /* ── Form ── */
-  .form-wrap { padding:16px 20px; }
-  .form-title { font-size:18px; font-weight:700; margin:0 0 16px; }
-  label.lbl { font-size:13px; font-weight:600; color:var(--text-mid); margin-bottom:6px; display:block; margin-top:14px; }
+  .form-wrap { padding:20px 20px; }
+  .form-title { font-size:20px; font-weight:700; margin:0 0 20px; }
+  label.lbl { font-size:13px; font-weight:600; color:var(--text-mid); margin-bottom:6px; display:block; margin-top:18px; }
+  label.lbl:first-of-type { margin-top:0; }
   .inp {
     width:100%; padding:14px 14px; border:1.5px solid var(--border); border-radius:10px;
     font-size:16px; background:#fff; font-family:inherit; outline:none;
@@ -126,7 +127,7 @@
   }
   .inp:focus { border-color:var(--accent); }
   textarea.inp { resize:vertical; font-size:15px; }
-  .preset-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .preset-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
   .preset-chip {
     padding:8px 16px; border-radius:20px; border:1.5px solid var(--border);
     background:#fff; font-size:14px; cursor:pointer; font-family:inherit; color:var(--text-mid);
@@ -172,47 +173,48 @@
   }
   .cost-unit { font-size:13px; color:var(--muted); white-space:nowrap; }
 
-  .extra-header { display:flex; justify-content:space-between; align-items:center; margin-top:14px; }
+  .extra-header { display:flex; justify-content:space-between; align-items:center; margin-top:20px; }
   .add-item-btn {
     background:none; border:1.5px dashed #c0bab0; border-radius:8px;
-    padding:5px 12px; font-size:12px; color:var(--accent); font-weight:600;
+    padding:7px 14px; font-size:13px; color:var(--accent); font-weight:600;
     cursor:pointer; font-family:inherit;
   }
   .catch-item {
-    background:#f8f6f2; border-radius:12px; padding:12px; margin-bottom:8px;
-    position:relative;
+    background:#f8f6f2; border-radius:14px; padding:14px; margin-bottom:10px;
+    position:relative; border:1px solid var(--border);
   }
-  .catch-item-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .catch-item-header { display:flex; align-items:center; gap:8px; }
   .catch-item-num {
-    width:24px; height:24px; border-radius:50%; background:var(--accent);
+    width:26px; height:26px; border-radius:50%; background:var(--accent);
     color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center;
     justify-content:center; flex-shrink:0;
   }
   .catch-species-row { display:flex; gap:8px; align-items:center; flex:1; }
   .catch-species-input {
-    flex:1; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px;
-    font-size:15px; background:#fff; font-family:inherit; outline:none; min-width:0;
+    flex:1; padding:12px 12px; border:1.5px solid var(--border); border-radius:10px;
+    font-size:16px; background:#fff; font-family:inherit; outline:none; min-width:0;
     -webkit-appearance:none;
   }
   .catch-select-btn {
     background:var(--accent); color:#fff; border:none; border-radius:10px;
-    padding:10px 12px; font-size:13px; font-weight:600; cursor:pointer;
+    padding:12px 14px; font-size:14px; font-weight:600; cursor:pointer;
     font-family:inherit; white-space:nowrap;
   }
-  .catch-detail-row { display:flex; gap:8px; margin-top:8px; margin-left:32px; }
+  .catch-detail-row { display:flex; gap:8px; margin-top:10px; padding-left:34px; }
   .catch-detail-field {
     flex:1; display:flex; align-items:center; background:#fff;
-    border:1.5px solid var(--border); border-radius:10px; padding:0 10px; gap:4px;
+    border:1.5px solid var(--border); border-radius:10px; padding:0 12px; gap:4px;
   }
   .catch-detail-input {
-    flex:1; border:none; outline:none; font-size:15px; padding:10px 0;
+    flex:1; border:none; outline:none; font-size:16px; padding:12px 0;
     background:transparent; font-family:inherit; text-align:right; min-width:0;
     -webkit-appearance:none;
   }
   .catch-detail-unit { font-size:13px; color:var(--muted); white-space:nowrap; }
   .catch-remove {
-    position:absolute; top:8px; right:8px; background:none; border:none;
-    font-size:18px; color:var(--muted); cursor:pointer; padding:4px 6px;
+    position:absolute; top:10px; right:10px; background:var(--sand); border:none;
+    font-size:16px; color:var(--muted); cursor:pointer; padding:4px 8px;
+    border-radius:8px; line-height:1;
   }
   .extra-item-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
   .extra-desc-input {
@@ -238,14 +240,14 @@
   .total-label { font-size:14px; font-weight:700; }
   .total-value { font-size:17px; font-weight:800; color:var(--accent); }
 
-  .form-buttons { display:flex; gap:10px; margin-top:24px; }
+  .form-buttons { display:flex; gap:10px; margin-top:28px; padding-bottom:8px; }
   .cancel-btn {
-    flex:1; padding:14px; border-radius:12px; border:1.5px solid var(--border);
-    background:#fff; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text-mid);
+    flex:1; padding:16px; border-radius:12px; border:1.5px solid var(--border);
+    background:#fff; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text-mid);
   }
   .submit-btn {
-    flex:2; padding:14px; border-radius:12px; border:none;
-    background:var(--accent); color:#fff; font-size:15px; font-weight:700;
+    flex:2; padding:16px; border-radius:12px; border:none;
+    background:var(--accent); color:#fff; font-size:16px; font-weight:700;
     cursor:pointer; font-family:inherit;
   }
   .submit-btn:disabled { opacity:0.4; }
@@ -315,9 +317,10 @@
 
   /* ── Tidal Info ── */
   .tidal-info {
-    display:flex; align-items:center; gap:10px;
+    display:flex; align-items:center; gap:12px;
     background:linear-gradient(135deg,#e6f2f4,#f0f7f8);
-    border-radius:10px; padding:12px 14px; margin-top:8px;
+    border-radius:12px; padding:14px 16px; margin-top:10px;
+    border:1px solid #d4e8ec;
   }
   .tidal-emoji { font-size:24px; }
   .tidal-main { flex:1; }
@@ -511,11 +514,31 @@ function switchView(view, eid) {
 
 function render() {
   const c = document.getElementById('content');
-  if (currentView === 'list') c.innerHTML = renderList();
-  else if (currentView === 'add') c.innerHTML = renderForm();
-  else if (currentView === 'stats') c.innerHTML = renderStats();
-  else if (currentView === 'data') c.innerHTML = renderData();
-  updateHeader();
+  try {
+    if (currentView === 'list') c.innerHTML = renderList();
+    else if (currentView === 'add') c.innerHTML = renderForm();
+    else if (currentView === 'stats') c.innerHTML = renderStats();
+    else if (currentView === 'data') c.innerHTML = renderData();
+    updateHeader();
+  } catch(e) {
+    c.innerHTML = '<div class="empty"><p>오류 발생: ' + e.message + '</p></div>';
+    console.error(e);
+  }
+}
+
+function renderCatchesHTML(r) {
+  var catches = getAllCatches(r);
+  var total = catches.reduce(function(s,c){ return s + num(c.count); }, 0);
+  var rows = catches.map(function(c){
+    return '<div class="card-catch-row">' +
+      '<span class="card-catch-species">' + esc(c.species) + '</span>' +
+      '<span class="card-catch-detail">' +
+        (c.sizeCm ? '<span class="badge-sm">' + c.sizeCm + 'cm</span>' : '') +
+        '<span class="badge-sm">' + num(c.count) + '마리</span>' +
+      '</span></div>';
+  }).join('');
+  return '<div class="card-catches">' + rows + '</div>' +
+    '<div class="card-total-fish"><span class="badge">합계 ' + total + '마리</span></div>';
 }
 
 // ── List ──
@@ -542,25 +565,7 @@ function renderList() {
         <span class="card-location">${esc(r.location)}</span>
       </div>
       <div class="card-body">
-        ${(() => {
-          const catches = getAllCatches(r);
-          const total = catches.reduce((s,c) => s + num(c.count), 0);
-          return `
-            <div class="card-catches">
-              ${catches.map(c => `
-                <div class="card-catch-row">
-                  <span class="card-catch-species">${esc(c.species)}</span>
-                  <span class="card-catch-detail">
-                    ${c.sizeCm ? `<span class="badge-sm">${c.sizeCm}cm</span>` : ''}
-                    <span class="badge-sm">${num(c.count)}마리</span>
-                  </span>
-                </div>
-              `).join('')}
-            </div>
-            <div class="card-total-fish">
-              <span class="badge">합계 ${total}마리</span>
-            </div>`;
-        })()}
+        ${renderCatchesHTML(r)}
       </div>
       ${(r.boatName || hasCost) ? `
         <div class="card-cost-row">
@@ -602,14 +607,14 @@ function doDelete(id) { records = records.filter(r => r.id !== id); save(); conf
 function renderForm() {
   const r = editingId ? records.find(x => x.id === editingId) : null;
   const isEdit = !!r;
-  const date = r?.date || getToday();
-  const location = r?.location || '';
+  const date = (r && r.date) || getToday();
+  const location = (r && r.location) || '';
   const catches = getAllCatches(r);
   const initCatches = catches.length > 0 ? catches : [{ species: '', count: '', sizeCm: '' }];
-  const boatName = r?.boatName || '';
-  const boatFee = r?.boatFee || '';
-  const extraItems = r?.extraItems || [];
-  const memo = r?.memo || '';
+  const boatName = (r && r.boatName) || '';
+  const boatFee = (r && r.boatFee) || '';
+  const extraItems = (r && r.extraItems) || [];
+  const memo = (r && r.memo) || '';
 
   return `
   <div class="form-wrap">
@@ -640,6 +645,8 @@ function renderForm() {
       <button class="dropdown-close" onclick="hideSpeciesDD()">닫기</button>
     </div>
 
+    <div style="border-top:1px solid var(--border);margin-top:22px;padding-top:4px"></div>
+
     <label class="lbl">선박명 (선택)</label>
     <input type="text" class="inp" id="f-boat" placeholder="예: 해적호" value="${esc(boatName)}">
 
@@ -663,6 +670,8 @@ function renderForm() {
         <span class="total-value" id="formTotalValue">0원</span>
       </div>
     </div>
+
+    <div style="border-top:1px solid var(--border);margin-top:22px;padding-top:4px"></div>
 
     <label class="lbl">메모 (선택)</label>
     <textarea class="inp" id="f-memo" placeholder="날씨, 미끼, 채비, 특이사항 등" rows="3">${esc(memo)}</textarea>
@@ -752,7 +761,8 @@ function renderTidalInfo(dateStr) {
 }
 
 function updateTidalDisplay() {
-  const dateVal = document.getElementById('f-date')?.value;
+  var dateEl = document.getElementById('f-date');
+  var dateVal = dateEl ? dateEl.value : null;
   const wrap = document.getElementById('tidalDisplay');
   if (!wrap || !dateVal) return;
   wrap.innerHTML = renderTidalInfo(dateVal);
@@ -886,7 +896,7 @@ function renderStats() {
     getAllCatches(r).forEach(c => { sMap[c.species] = (sMap[c.species]||0) + num(c.count); });
   });
   const sRank = Object.entries(sMap).sort((a,b) => b[1]-a[1]).slice(0,8);
-  const sMax = sRank[0]?.[1] || 1;
+  const sMax = (sRank[0] && sRank[0][1]) || 1;
 
   // Location
   const lMap = {};
